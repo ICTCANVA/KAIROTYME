@@ -1,0 +1,2604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0f12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="kairoTYME" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>kairoTYME</title>
+
+  <!-- Fonts: Chakra Petch (Header), Ninja Kage / Reggae One (Timer), Roboto Mono (UI/Scrambles) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Reggae+One&family=Roboto+Mono:wght@400;500;700&family=RocknRoll+One&display=swap" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/ninja-kage" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-main: #0d0f12;
+      --bg-panel: #14171d;
+      --bg-header: #181c24;
+      --bg-hover: #212733;
+      --border-color: #2a313f;
+      --text-primary: #e6ebf5;
+      --text-muted: #8b95a8;
+      --accent-blue: #3b82f6;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --overlay-rgba: rgba(13, 15, 18, 0.72);
+      --bg-blur: 0px;
+    }
+
+    body.theme-light {
+      --bg-main: #f3f5f8;
+      --bg-panel: #ffffff;
+      --bg-header: #e8ecf2;
+      --bg-hover: #dde3ec;
+      --border-color: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-muted: #475569;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-red: #dc2626;
+      --accent-amber: #d97706;
+      --overlay-rgba: rgba(243, 245, 248, 0.78);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      font-family: 'Roboto Mono', monospace;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Custom Background Layer (Supports Images & Animated GIFs) */
+    #bg-image-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: blur(var(--bg-blur));
+      transform: scale(1.03);
+      pointer-events: none;
+    }
+
+    #bg-overlay-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background-color: var(--overlay-rgba);
+      pointer-events: none;
+      transition: background-color 0.2s ease;
+    }
+
+    /* App Layout */
+    #app-shell {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    /* Streamlined Top Control Bar */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: calc(6px + env(safe-area-inset-top)) 10px 6px;
+      background-color: var(--bg-header);
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+      z-index: 20;
+    }
+
+    .top-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ui-btn, .ui-select, .ui-input {
+      background-color: var(--bg-panel);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 6px 10px;
+      min-height: 34px;
+      cursor: pointer;
+      outline: none;
+      border-radius: 2px;
+      transition: background-color 0.12s, border-color 0.12s;
+    }
+
+    .ui-btn:hover, .ui-select:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--accent-blue);
+    }
+
+    .ui-btn.active {
+      background-color: var(--accent-blue);
+      color: #ffffff;
+      border-color: var(--accent-blue);
+    }
+
+    .ui-btn.danger {
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .ui-btn.danger:hover {
+      background-color: var(--accent-red);
+      color: #ffffff;
+    }
+
+    .ui-btn.success {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .ui-btn.success.active, .ui-btn.success:hover {
+      background-color: var(--accent-green);
+      color: #0b0e11;
+    }
+
+    .ui-input {
+      cursor: text;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    /* Scramble Strip */
+    #scramble-bar {
+      width: 100%;
+      padding: 10px 14px;
+      text-align: center;
+      background-color: rgba(20, 23, 29, 0.72);
+      border-bottom: 1px solid var(--border-color);
+      font-size: clamp(14px, 2.3vw, 20px);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      line-height: 1.45;
+      cursor: pointer;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    body.theme-light #scramble-bar {
+      background-color: rgba(255, 255, 255, 0.78);
+    }
+
+    #scramble-bar:active {
+      opacity: 0.75;
+    }
+
+    /* Workspace Container */
+    #workspace {
+      position: relative;
+      flex: 1;
+      display: flex;
+      width: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Side Drawers (Left: Stats, Right: VC & Chat Comms) */
+    .side-drawer {
+      width: 300px;
+      max-width: 88vw;
+      height: 100%;
+      background-color: var(--bg-panel);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 25;
+      transition: transform 0.18s ease, width 0.18s ease;
+    }
+
+    #stats-panel {
+      border-right: 1px solid var(--border-color);
+    }
+
+    #comms-panel {
+      border-left: 1px solid var(--border-color);
+    }
+
+    @media (min-width: 861px) {
+      .side-drawer.collapsed {
+        width: 0 !important;
+        overflow: hidden;
+        border: none !important;
+      }
+      .side-drawer.collapsed > * {
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .side-drawer {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 310px;
+        max-width: 90vw;
+        z-index: 50;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.75);
+      }
+      #stats-panel {
+        left: 0;
+        transform: translateX(-100%);
+      }
+      #stats-panel.open {
+        transform: translateX(0);
+      }
+      #comms-panel {
+        right: 0;
+        transform: translateX(100%);
+      }
+      #comms-panel.open {
+        transform: translateX(0);
+      }
+    }
+
+    #drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 45;
+    }
+
+    #drawer-backdrop.open {
+      display: block;
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background-color: var(--bg-header);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .drawer-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Tables in Stats Drawer */
+    .stat-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .stat-table th, .stat-table td {
+      border: 1px solid var(--border-color);
+      padding: 5px 6px;
+      text-align: right;
+    }
+
+    .stat-table th:first-child, .stat-table td:first-child {
+      text-align: left;
+    }
+
+    .stat-table th {
+      background-color: var(--bg-header);
+      color: var(--text-muted);
+    }
+
+    .solve-row {
+      cursor: pointer;
+    }
+
+    .solve-row:hover {
+      background-color: var(--bg-hover);
+    }
+
+    /* Main Center Timer Arena */
+    #timer-zone {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-evenly;
+      padding: 8px 14px calc(10px + env(safe-area-inset-bottom));
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      touch-action: manipulation;
+    }
+
+    /* Borderless Big kairoTYME Header */
+    .kairo-brand-title {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: clamp(2.1rem, 5.2vw, 3.7rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      color: var(--text-primary);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+      pointer-events: none;
+    }
+
+    .kairo-brand-title span {
+      color: var(--accent-blue);
+    }
+
+    /* Timer Readout with Ninja Kage Font */
+    #timer-core {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    #timer-status-cue {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      min-height: 16px;
+    }
+
+    #timer-display {
+      font-family: 'Ninja Kage', 'Reggae One', 'RocknRoll One', monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(4.2rem, 15vw, 8.8rem);
+      line-height: 1.02;
+      color: var(--text-primary);
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
+      transition: color 0.08s ease;
+      text-align: center;
+    }
+
+    #timer-display.state-holding {
+      color: var(--accent-red);
+    }
+
+    #timer-display.state-ready {
+      color: var(--accent-green);
+    }
+
+    #timer-display.state-inspect {
+      color: var(--accent-amber);
+    }
+
+    /* CFOP Live Split Strip */
+    #cfop-strip {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    #cfop-strip.visible {
+      display: grid;
+    }
+
+    .cfop-box {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      padding: 6px 8px;
+      text-align: center;
+    }
+
+    .cfop-box.active {
+      border-color: var(--accent-blue);
+      background-color: var(--bg-hover);
+    }
+
+    .cfop-box.done {
+      border-color: var(--accent-green);
+    }
+
+    .cfop-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .cfop-val {
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* Always-Visible Camera Dock Below Timer (Visible Even While Solving) */
+    #solve-cam-dock {
+      display: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 680px;
+      z-index: 15;
+    }
+
+    #solve-cam-dock.has-cams {
+      display: flex;
+    }
+
+    .solve-cam-tile {
+      position: relative;
+      width: 148px;
+      height: 92px;
+      background: #000;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .solve-cam-tile.solving {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 1px var(--accent-blue);
+    }
+
+    .solve-cam-tile video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .solve-cam-tile video.mirrored {
+      transform: scaleX(-1);
+    }
+
+    .solve-cam-badge {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 2px 5px;
+      background: rgba(0, 0, 0, 0.72);
+      color: #fff;
+      font-size: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Duel Panel (Local 2-6P & Online Rooms) */
+    #duel-panel {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 680px;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      padding: 10px;
+    }
+
+    #duel-panel.visible {
+      display: flex;
+    }
+
+    .duel-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .duel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 6px;
+    }
+
+    .duel-card {
+      background-color: var(--bg-header);
+      border: 1px solid var(--border-color);
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+    }
+
+    .duel-card.active-turn {
+      border-color: var(--accent-blue);
+    }
+
+    .duel-card.winner {
+      border-color: var(--accent-green);
+    }
+
+    .duel-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .duel-name {
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .duel-time {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    /* Hide non-essential UI during active solve */
+    body.solving-active .hide-on-solve {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* Voice & Chat Comms Inside Right Drawer */
+    .comms-box {
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-header);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .comms-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .peer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 7px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-panel);
+      font-size: 11px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--accent-green);
+    }
+
+    #chat-feed {
+      flex: 1;
+      min-height: 160px;
+      max-height: 45dvh;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-main);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 11px;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .chat-msg {
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .chat-sender {
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    /* Settings & Solve Detail Modals */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(0, 0, 0, 0.72);
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 440px;
+      max-height: 88dvh;
+      overflow-y: auto;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .setting-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .setting-inline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .pc-only {
+      display: inline-flex;
+    }
+
+    @media (max-width: 768px), (pointer: coarse) {
+      .pc-only {
+        display: none !important;
+      }
+      .ui-btn, .ui-select, .ui-input {
+        padding: 6px 8px;
+        font-size: 11px;
+      }
+      .solve-cam-tile {
+        width: 116px;
+        height: 74px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="bg-image-layer"></div>
+  <div id="bg-overlay-layer"></div>
+  <div id="remote-audio-pool" style="display:none;"></div>
+
+  <div id="app-shell">
+    <!-- Clean Top Bar -->
+    <header id="top-bar" class="hide-on-solve">
+      <div class="top-group">
+        <button id="btn-toggle-stats" class="ui-btn" title="Stats & Solves (Alt+S)">Stats</button>
+        <button id="btn-toggle-insp" class="ui-btn">Insp: OFF</button>
+        <select id="select-duel-mode" class="ui-select" aria-label="Duel Mode">
+          <option value="off">Duel: OFF</option>
+          <option value="online">Duel: Online</option>
+          <option value="2">Duel: 2P Local</option>
+          <option value="3">Duel: 3P Local</option>
+          <option value="4">Duel: 4P Local</option>
+          <option value="5">Duel: 5P Local</option>
+          <option value="6">Duel: 6P Local</option>
+        </select>
+      </div>
+      <div class="top-group">
+        <button id="btn-toggle-comms" class="ui-btn" title="Voice & Chat Comms (Alt+M)">VC <span id="comms-badge"></span></button>
+        <button id="btn-open-settings" class="ui-btn" title="Settings">⚙</button>
+      </div>
+    </header>
+
+    <!-- Scramble Display (Tap to Generate Next Scramble) -->
+    <div id="scramble-bar" class="hide-on-solve" title="Tap for next scramble">
+      Loading scramble...
+    </div>
+
+    <!-- Main Workspace -->
+    <div id="workspace">
+      <div id="drawer-backdrop"></div>
+
+      <!-- Left Drawer: Statistics & Solve History -->
+      <aside id="stats-panel" class="side-drawer collapsed hide-on-solve">
+        <div class="drawer-header">
+          <span>STATISTICS &amp; SOLVES</span>
+          <button id="btn-close-stats" class="ui-btn">✕</button>
+        </div>
+        <div class="drawer-scroll">
+          <div class="comms-row">
+            <select id="select-session" class="ui-select" style="flex:1;"></select>
+            <button id="btn-new-session" class="ui-btn" title="New Session">+</button>
+            <button id="btn-reset-session" class="ui-btn danger" title="Clear Session">Clear</button>
+          </div>
+
+          <table class="stat-table">
+            <thead>
+              <tr>
+                <th>Stat</th>
+                <th>Current</th>
+                <th>Best (PB)</th>
+              </tr>
+            </thead>
+            <tbody id="summary-stats-body">
+              <tr><td>single</td><td id="stat-cur-single">-</td><td id="stat-best-single">-</td></tr>
+              <tr><td>mo3</td><td id="stat-cur-mo3">-</td><td id="stat-best-mo3">-</td></tr>
+              <tr><td>ao5</td><td id="stat-cur-ao5">-</td><td id="stat-best-ao5">-</td></tr>
+              <tr><td>ao12</td><td id="stat-cur-ao12">-</td><td id="stat-best-ao12">-</td></tr>
+            </tbody>
+          </table>
+
+          <div id="cfop-summary-wrap" style="display:none;">
+            <div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--text-muted);">CFOP PHASE AVERAGES</div>
+            <table class="stat-table">
+              <thead>
+                <tr>
+                  <th>Phase</th>
+                  <th>Mean</th>
+                  <th>Share</th>
+                </tr>
+              </thead>
+              <tbody id="cfop-stats-body"></tbody>
+            </table>
+          </div>
+
+          <div class="comms-row">
+            <button id="btn-export-json" class="ui-btn" style="flex:1;">Export JSON</button>
+            <button id="btn-import-json" class="ui-btn" style="flex:1;">Import JSON</button>
+            <input id="file-import-json" type="file" accept=".json" style="display:none;" />
+          </div>
+
+          <table class="stat-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Time</th>
+                <th>ao5</th>
+                <th>ao12</th>
+              </tr>
+            </thead>
+            <tbody id="solve-list-body"></tbody>
+          </table>
+        </div>
+      </aside>
+
+      <!-- Center Timer Arena -->
+      <main id="timer-zone">
+        <h1 class="kairo-brand-title hide-on-solve">kairo<span>TYME</span></h1>
+
+        <div id="timer-core">
+          <div id="timer-status-cue">HOLD SPACE OR TOUCH TO READY</div>
+          <div id="timer-display">0.00</div>
+        </div>
+
+        <!-- CFOP 4-Phase Live Split Strip -->
+        <div id="cfop-strip">
+          <div class="cfop-box" id="cfop-box-0">
+            <div class="cfop-label">Cross</div>
+            <div class="cfop-val" id="cfop-val-0">-</div>
+          </div>
+          <div class="cfop-box" id="cfop-box-1">
+            <div class="cfop-label">F2L</div>
+            <div class="cfop-val" id="cfop-val-1">-</div>
+          </div>
+          <div class="cfop-box" id="cfop-box-2">
+            <div class="cfop-label">OLL</div>
+            <div class="cfop-val" id="cfop-val-2">-</div>
+          </div>
+          <div class="cfop-box" id="cfop-box-3">
+            <div class="cfop-label">PLL</div>
+            <div class="cfop-val" id="cfop-val-3">-</div>
+          </div>
+        </div>
+
+        <!-- Always-Visible Live Camera Strip Below Timer (Remains Visible While Solving) -->
+        <div id="solve-cam-dock"></div>
+
+        <!-- Duel Panel (Online Individual-Timer Rooms & Local 2-6P Race) -->
+        <section id="duel-panel" class="hide-on-solve">
+          <!-- Online Room Controls -->
+          <div id="online-room-controls" class="duel-bar" style="display:none;">
+            <div class="comms-row">
+              <span>ROOM: <strong id="online-room-code-label">NONE</strong></span>
+              <button id="btn-copy-room" class="ui-btn">Copy</button>
+              <button id="btn-create-room" class="ui-btn active">New</button>
+            </div>
+            <div class="comms-row">
+              <input id="input-join-code" class="ui-input" maxlength="6" placeholder="CODE" style="width:76px;text-transform:uppercase;" />
+              <button id="btn-join-room" class="ui-btn">Join</button>
+            </div>
+            <div class="comms-row" style="width:100%;justify-content:space-between;">
+              <div class="comms-row">
+                <span>You:</span>
+                <input id="input-player-alias" class="ui-input" maxlength="16" style="width:120px;" />
+              </div>
+              <button id="btn-online-next-round" class="ui-btn" style="display:none;">Next Round &amp; Scramble</button>
+            </div>
+          </div>
+
+          <!-- Local 2-6P Duel Controls -->
+          <div id="local-duel-controls" class="duel-bar" style="display:none;">
+            <span id="local-duel-hint">Shared clock: tap SPACE as each player finishes.</span>
+            <button id="btn-local-next-round" class="ui-btn">Next Round</button>
+          </div>
+
+          <!-- Player Cards Grid -->
+          <div id="duel-players-grid" class="duel-grid"></div>
+        </section>
+      </main>
+
+      <!-- Right Drawer: Voice Chat, PC Camera & Room Text Chat -->
+      <aside id="comms-panel" class="side-drawer collapsed hide-on-solve">
+        <div class="drawer-header">
+          <span>ROOM COMMS (VC &amp; CHAT)</span>
+          <button id="btn-close-comms" class="ui-btn">✕</button>
+        </div>
+        <div class="drawer-scroll">
+          <!-- Voice & PC Video Box -->
+          <div class="comms-box">
+            <div style="font-size:11px;font-weight:700;">VOICE &amp; PC CAMERA</div>
+            <div id="vc-room-warning" style="font-size:11px;color:var(--text-muted);">
+              Switch Duel to <strong>Online</strong> and create/join a room to talk live.
+            </div>
+            <div class="comms-row">
+              <button id="btn-vc-join" class="ui-btn success">Join Voice</button>
+              <button id="btn-vc-mute" class="ui-btn" style="display:none;">Mute Mic</button>
+              <button id="btn-vc-cam" class="ui-btn pc-only" style="display:none;">Cam Off</button>
+              <button id="btn-vc-leave" class="ui-btn danger" style="display:none;">Leave</button>
+            </div>
+            <button id="btn-mobile-audio-unlock" class="ui-btn active" style="display:none;width:100%;">
+              🔊 Tap to Enable Incoming Voice Audio
+            </button>
+            <div id="vc-status-text" style="font-size:11px;color:var(--text-muted);">Voice disconnected.</div>
+            <div id="vc-peers-list" class="comms-row"></div>
+          </div>
+
+          <!-- Text Chat Box -->
+          <div class="comms-box" style="flex:1;">
+            <div style="font-size:11px;font-weight:700;">ROOM CHAT</div>
+            <div id="chat-feed">
+              <div style="color:var(--text-muted);">Join an Online Duel room to chat with players.</div>
+            </div>
+            <div class="comms-row">
+              <button class="ui-btn quick-chat-btn" data-msg="Ready!">Ready!</button>
+              <button class="ui-btn quick-chat-btn" data-msg="GG!">GG!</button>
+              <button class="ui-btn quick-chat-btn" data-msg="Nice PB!">Nice PB!</button>
+              <button class="ui-btn quick-chat-btn" data-msg="+2 rip">+2 rip</button>
+            </div>
+            <form id="chat-form" class="comms-row" style="flex-wrap:nowrap;">
+              <input id="chat-input" class="ui-input" maxlength="250" placeholder="Send message..." style="flex:1;" />
+              <button type="submit" class="ui-btn active">Send</button>
+            </form>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>kairoTYME SETTINGS</span>
+        <button id="btn-close-settings" class="ui-btn">✕</button>
+      </div>
+
+      <div class="setting-row">
+        <label for="select-event"><strong>Puzzle / Event</strong></label>
+        <div class="comms-row">
+          <select id="select-event" class="ui-select" style="flex:1;">
+            <option value="333">3x3x3</option>
+            <option value="222">2x2x2</option>
+            <option value="444">4x4x4</option>
+            <option value="555">5x5x5</option>
+            <option value="333oh">3x3x3 One-Handed</option>
+            <option value="pyram">Pyraminx</option>
+            <option value="skewb">Skewb</option>
+            <option value="minx">Megaminx</option>
+          </select>
+          <button id="btn-next-scramble" class="ui-btn">Next</button>
+          <button id="btn-copy-scramble" class="ui-btn">Copy</button>
+        </div>
+      </div>
+
+      <div class="setting-inline">
+        <span><strong>CFOP 4-Phase Splits</strong> (Cross/F2L/OLL/PLL)</span>
+        <button id="btn-toggle-splits" class="ui-btn">OFF</button>
+      </div>
+
+      <div class="setting-inline">
+        <span><strong>Theme</strong></span>
+        <button id="btn-toggle-theme" class="ui-btn">Dark</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border-color);" />
+
+      <div class="setting-row">
+        <strong>Custom Background Image / Animated GIF</strong>
+        <input id="file-bg-upload" type="file" accept="image/*,.gif" class="ui-input" />
+        <div class="comms-row">
+          <input id="input-bg-url" class="ui-input" placeholder="Or paste image / GIF URL..." style="flex:1;" />
+          <button id="btn-apply-bg-url" class="ui-btn">Apply</button>
+        </div>
+        <div class="setting-inline">
+          <span>Overlay Dimness: <span id="bg-dim-val">72%</span></span>
+          <input id="range-bg-dim" type="range" min="15" max="95" value="72" />
+        </div>
+        <div class="setting-inline">
+          <span>Background Blur: <span id="bg-blur-val">0px</span></span>
+          <input id="range-bg-blur" type="range" min="0" max="16" value="0" />
+        </div>
+        <button id="btn-clear-bg" class="ui-btn danger">Remove Background</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Solve Details Modal -->
+  <div id="solve-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span id="solve-modal-title">SOLVE DETAILS</span>
+        <button id="btn-close-solve-modal" class="ui-btn">✕</button>
+      </div>
+      <div id="solve-modal-body" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div class="comms-row">
+        <button id="btn-solve-ok" class="ui-btn" style="flex:1;">OK</button>
+        <button id="btn-solve-plus2" class="ui-btn" style="flex:1;">+2</button>
+        <button id="btn-solve-dnf" class="ui-btn" style="flex:1;">DNF</button>
+        <button id="btn-solve-del" class="ui-btn danger" style="flex:1;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase v11.0.2 Modular SDK + Complete Application Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      updateDoc,
+      addDoc,
+      deleteDoc,
+      collection,
+      onSnapshot,
+      query,
+      orderBy,
+      limit,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    // Your kairoTYME Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGhJcQ0RubluRRntAysRIfYZfIJfEQ4hw",
+      authDomain: "kairotyme.firebaseapp.com",
+      projectId: "kairotyme",
+      storageBucket: "kairotyme.firebasestorage.app",
+      messagingSenderId: "945201390499",
+      appId: "1:945201390499:web:59f1d2a39a67de8093f016",
+      measurementId: "G-T8JL6BRSFP"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const fbAuth = getAuth(fbApp);
+    const fbDb = getFirestore(fbApp);
+
+    // =========================================================================
+    // 1. STATE & STORAGE
+    // =========================================================================
+    const STORAGE_KEY = 'kairotyme_state_v3';
+    const CFOP_PHASES = ['Cross', 'F2L', 'OLL', 'PLL'];
+
+    const defaultState = {
+      event: '333',
+      theme: 'dark',
+      inspectionEnabled: false,
+      splitsEnabled: false,
+      duelMode: 'off', // 'off' | 'online' | '2'..'6'
+      playerAlias: 'Player ' + Math.floor(10 + Math.random() * 89),
+      bgDim: 72,
+      bgBlur: 0,
+      bgUrl: '',
+      activeSessionId: 'default',
+      sessions: {
+        default: { name: 'Session 1', solves: [] }
+      },
+      localDuelPlayers: [
+        { name: 'P1', wins: 0, timeMs: null, penalty: 'OK' },
+        { name: 'P2', wins: 0, timeMs: null, penalty: 'OK' },
+        { name: 'P3', wins: 0, timeMs: null, penalty: 'OK' },
+        { name: 'P4', wins: 0, timeMs: null, penalty: 'OK' },
+        { name: 'P5', wins: 0, timeMs: null, penalty: 'OK' },
+        { name: 'P6', wins: 0, timeMs: null, penalty: 'OK' }
+      ]
+    };
+
+    let state = loadState();
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultState);
+        const parsed = JSON.parse(raw);
+        return {
+          ...structuredClone(defaultState),
+          ...parsed,
+          sessions: parsed.sessions && Object.keys(parsed.sessions).length
+            ? parsed.sessions
+            : structuredClone(defaultState.sessions)
+        };
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('LocalStorage save warning:', e);
+      }
+    }
+
+    // IndexedDB for Persistent Animated GIF / Image Backgrounds
+    function openBgDb() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('kairotyme_bg_db', 1);
+        req.onupgradeneeded = () => req.result.createObjectStore('assets');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function saveBgBlobToIdb(blob) {
+      const db = await openBgDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('assets', 'readwrite');
+        tx.objectStore('assets').put(blob, 'custom_bg');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function loadBgBlobFromIdb() {
+      const db = await openBgDb();
+      return new Promise((resolve) => {
+        const tx = db.transaction('assets', 'readonly');
+        const req = tx.objectStore('assets').get('custom_bg');
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    async function clearBgBlobFromIdb() {
+      const db = await openBgDb();
+      const tx = db.transaction('assets', 'readwrite');
+      tx.objectStore('assets').delete('custom_bg');
+    }
+
+    let currentBgObjectUrl = null;
+    async function applyBackgroundVisuals() {
+      const layer = document.getElementById('bg-image-layer');
+      document.documentElement.style.setProperty('--bg-blur', `${state.bgBlur}px`);
+      const dimAlpha = (state.bgDim / 100).toFixed(2);
+      const isLight = state.theme === 'light';
+      document.documentElement.style.setProperty(
+        '--overlay-rgba',
+        isLight ? `rgba(243, 245, 248, ${dimAlpha})` : `rgba(13, 15, 18, ${dimAlpha})`
+      );
+      document.getElementById('bg-dim-val').textContent = `${state.bgDim}%`;
+      document.getElementById('bg-blur-val').textContent = `${state.bgBlur}px`;
+      document.getElementById('range-bg-dim').value = state.bgDim;
+      document.getElementById('range-bg-blur').value = state.bgBlur;
+
+      if (state.bgUrl) {
+        layer.style.backgroundImage = `url("${state.bgUrl}")`;
+        return;
+      }
+
+      const blob = await loadBgBlobFromIdb();
+      if (blob) {
+        if (currentBgObjectUrl) URL.revokeObjectURL(currentBgObjectUrl);
+        currentBgObjectUrl = URL.createObjectURL(blob);
+        layer.style.backgroundImage = `url("${currentBgObjectUrl}")`;
+      } else {
+        layer.style.backgroundImage = 'none';
+      }
+    }
+
+    // =========================================================================
+    // 2. WCA SCRAMBLE GENERATOR
+    // =========================================================================
+    let currentScramble = '';
+
+    function generateScramble(event) {
+      const rand = (n) => Math.floor(Math.random() * n);
+      if (event === '222') {
+        const faces = ['U', 'R', 'F'];
+        const mods = ['', "'", '2'];
+        const out = [];
+        let last = -1;
+        while (out.length < 9) {
+          const f = rand(3);
+          if (f === last) continue;
+          last = f;
+          out.push(faces[f] + mods[rand(3)]);
+        }
+        return out.join(' ');
+      }
+      if (event === 'pyram') {
+        const faces = ['U', 'L', 'R', 'B'];
+        const tips = ['u', 'l', 'r', 'b'];
+        const mods = ['', "'"];
+        const out = [];
+        let last = -1;
+        while (out.length < 8) {
+          const f = rand(4);
+          if (f === last) continue;
+          last = f;
+          out.push(faces[f] + mods[rand(2)]);
+        }
+        tips.forEach((t) => {
+          const r = rand(3);
+          if (r === 1) out.push(t);
+          if (r === 2) out.push(t + "'");
+        });
+        return out.join(' ');
+      }
+      if (event === 'skewb') {
+        const faces = ['U', 'L', 'R', 'B'];
+        const mods = ['', "'"];
+        const out = [];
+        let last = -1;
+        while (out.length < 9) {
+          const f = rand(4);
+          if (f === last) continue;
+          last = f;
+          out.push(faces[f] + mods[rand(2)]);
+        }
+        return out.join(' ');
+      }
+      if (event === 'minx') {
+        const lines = [];
+        for (let r = 0; r < 5; r++) {
+          const row = [];
+          for (let c = 0; c < 10; c++) {
+            const mv = c % 2 === 0 ? 'R' : 'D';
+            row.push(mv + (rand(2) ? '++' : '--'));
+          }
+          row.push(rand(2) ? 'U' : "U'");
+          lines.push(row.join(' '));
+        }
+        return lines.join(' / ');
+      }
+
+      // NxNxN (3x3, 4x4, 5x5)
+      const lenMap = { '333': 20, '333oh': 20, '444': 40, '555': 60 };
+      const length = lenMap[event] || 20;
+      const faces = event === '333' || event === '333oh'
+        ? ['U', 'D', 'R', 'L', 'F', 'B']
+        : ['U', 'D', 'R', 'L', 'F', 'B', 'Uw', 'Dw', 'Rw', 'Lw', 'Fw', 'Bw'];
+      const mods = ['', "'", '2'];
+      const out = [];
+      let prevAxis = -1;
+      let prevFace = -1;
+
+      while (out.length < length) {
+        const idx = rand(faces.length);
+        const axis = Math.floor((idx % 6) / 2);
+        if (idx === prevFace || axis === prevAxis) continue;
+        prevFace = idx;
+        prevAxis = axis;
+        out.push(faces[idx] + mods[rand(3)]);
+      }
+      return out.join(' ');
+    }
+
+    function nextScramble(pushToOnlineRoom = true) {
+      currentScramble = generateScramble(state.event);
+      document.getElementById('scramble-bar').textContent = currentScramble;
+      if (pushToOnlineRoom && state.duelMode === 'online' && onlineRoomCode && currentUser) {
+        updateDoc(doc(fbDb, 'duel_rooms', onlineRoomCode), {
+          scramble: currentScramble,
+          event: state.event
+        }).catch(() => {});
+      }
+    }
+
+    // =========================================================================
+    // 3. TIME FORMATTING & WCA STATISTICS
+    // =========================================================================
+    function formatTime(ms, penalty = 'OK') {
+      if (penalty === 'DNF' || ms === null || ms === undefined || Number.isNaN(ms)) return 'DNF';
+      const totalMs = Math.max(0, Math.round(ms + (penalty === '+2' ? 2000 : 0)));
+      const minutes = Math.floor(totalMs / 60000);
+      const seconds = Math.floor((totalMs % 60000) / 1000);
+      const hundredths = Math.floor((totalMs % 1000) / 10);
+      const secStr = minutes > 0 ? String(seconds).padStart(2, '0') : String(seconds);
+      const base = `${minutes > 0 ? minutes + ':' : ''}${secStr}.${String(hundredths).padStart(2, '0')}`;
+      return penalty === '+2' ? base + '+' : base;
+    }
+
+    function effectiveSolveMs(solve) {
+      if (!solve || solve.penalty === 'DNF') return Infinity;
+      return solve.timeMs + (solve.penalty === '+2' ? 2000 : 0);
+    }
+
+    function computeAverage(solvesSlice, trimEnds = true) {
+      if (!solvesSlice || solvesSlice.length === 0) return null;
+      const values = solvesSlice.map(effectiveSolveMs);
+      const dnfCount = values.filter((v) => v === Infinity).length;
+
+      if (!trimEnds) {
+        if (dnfCount > 0) return Infinity;
+        return values.reduce((a, b) => a + b, 0) / values.length;
+      }
+
+      if (dnfCount >= 2) return Infinity;
+      const sorted = [...values].sort((a, b) => a - b);
+      const trimmed = sorted.slice(1, sorted.length - 1);
+      return trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+    }
+
+    function renderStatsPanel() {
+      const session = state.sessions[state.activeSessionId] || Object.values(state.sessions)[0];
+      const solves = session.solves;
+
+      // Session selector
+      const sel = document.getElementById('select-session');
+      sel.innerHTML = '';
+      Object.entries(state.sessions).forEach(([id, s]) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = `${s.name} (${s.solves.length})`;
+        if (id === state.activeSessionId) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      const fmtStat = (val) => {
+        if (val === null || val === undefined) return '-';
+        if (val === Infinity) return 'DNF';
+        return formatTime(val, 'OK');
+      };
+
+      // Current & Best stats
+      const validSingles = solves.map(effectiveSolveMs).filter((v) => v !== Infinity);
+      const curSingle = solves.length ? effectiveSolveMs(solves[solves.length - 1]) : null;
+      const bestSingle = validSingles.length ? Math.min(...validSingles) : null;
+
+      let curMo3 = null, bestMo3 = null;
+      let curAo5 = null, bestAo5 = null;
+      let curAo12 = null, bestAo12 = null;
+
+      for (let i = 0; i < solves.length; i++) {
+        if (i >= 2) {
+          const m = computeAverage(solves.slice(i - 2, i + 1), false);
+          curMo3 = m;
+          if (m !== Infinity && (bestMo3 === null || m < bestMo3)) bestMo3 = m;
+        }
+        if (i >= 4) {
+          const a5 = computeAverage(solves.slice(i - 4, i + 1), true);
+          curAo5 = a5;
+          if (a5 !== Infinity && (bestAo5 === null || a5 < bestAo5)) bestAo5 = a5;
+        }
+        if (i >= 11) {
+          const a12 = computeAverage(solves.slice(i - 11, i + 1), true);
+          curAo12 = a12;
+          if (a12 !== Infinity && (bestAo12 === null || a12 < bestAo12)) bestAo12 = a12;
+        }
+      }
+
+      document.getElementById('stat-cur-single').textContent = fmtStat(curSingle);
+      document.getElementById('stat-best-single').textContent = fmtStat(bestSingle);
+      document.getElementById('stat-cur-mo3').textContent = fmtStat(curMo3);
+      document.getElementById('stat-best-mo3').textContent = fmtStat(bestMo3);
+      document.getElementById('stat-cur-ao5').textContent = fmtStat(curAo5);
+      document.getElementById('stat-best-ao5').textContent = fmtStat(bestAo5);
+      document.getElementById('stat-cur-ao12').textContent = fmtStat(curAo12);
+      document.getElementById('stat-best-ao12').textContent = fmtStat(bestAo12);
+
+      // CFOP Phase Averages
+      const splitSolves = solves.filter((s) => Array.isArray(s.splits) && s.splits.length === 4 && s.penalty !== 'DNF');
+      const cfopWrap = document.getElementById('cfop-summary-wrap');
+      if (state.splitsEnabled || splitSolves.length > 0) {
+        cfopWrap.style.display = 'block';
+        const tbody = document.getElementById('cfop-stats-body');
+        tbody.innerHTML = '';
+        if (splitSolves.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">No split solves yet</td></tr>';
+        } else {
+          const sums = [0, 0, 0, 0];
+          splitSolves.forEach((s) => s.splits.forEach((v, idx) => (sums[idx] += v)));
+          const totalMean = sums.reduce((a, b) => a + b, 0) / splitSolves.length;
+          CFOP_PHASES.forEach((phase, idx) => {
+            const mean = sums[idx] / splitSolves.length;
+            const pct = totalMean > 0 ? Math.round((mean / totalMean) * 100) : 0;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${phase}</td><td>${formatTime(mean)}</td><td>${pct}%</td>`;
+            tbody.appendChild(tr);
+          });
+        }
+      } else {
+        cfopWrap.style.display = 'none';
+      }
+
+      // Solve List (Newest First)
+      const listBody = document.getElementById('solve-list-body');
+      listBody.innerHTML = '';
+      for (let i = solves.length - 1; i >= 0; i--) {
+        const s = solves[i];
+        const a5 = i >= 4 ? fmtStat(computeAverage(solves.slice(i - 4, i + 1), true)) : '-';
+        const a12 = i >= 11 ? fmtStat(computeAverage(solves.slice(i - 11, i + 1), true)) : '-';
+        const tr = document.createElement('tr');
+        tr.className = 'solve-row';
+        tr.innerHTML = `
+          <td>${i + 1}${Array.isArray(s.splits) ? ' [S]' : ''}</td>
+          <td><strong>${formatTime(s.timeMs, s.penalty)}</strong></td>
+          <td>${a5}</td>
+          <td>${a12}</td>
+        `;
+        tr.addEventListener('click', () => openSolveModal(i));
+        listBody.appendChild(tr);
+      }
+    }
+
+    // =========================================================================
+    // 4. TIMER ENGINE (HOLD-TO-READY, NON-PAUSING 15S INSPECTION, CFOP, DUEL)
+    // =========================================================================
+    let timerState = 'IDLE'; // 'IDLE' | 'INSPECTING' | 'RUNNING' | 'STOPPED'
+    let holdReady = false;
+    let holdTimerId = null;
+    let solveStartPerf = 0;
+    let rafId = null;
+    let lastTapDebounce = 0;
+
+    // Inspection state (never pauses while holding Space/Touch!)
+    let inspectStartPerf = 0;
+    let inspectIntervalId = null;
+    let inspectPenalty = 'OK';
+
+    // CFOP split state
+    let currentSplitIndex = 0;
+    let currentSplitStartPerf = 0;
+    let recordedSplits = [];
+
+    // Local 2-6P duel state
+    let localDuelTurn = 0;
+
+    const timerDisplayEl = document.getElementById('timer-display');
+    const timerCueEl = document.getElementById('timer-status-cue');
+
+    function updateTimerCue(text) {
+      timerCueEl.textContent = text;
+    }
+
+    function startInspection() {
+      timerState = 'INSPECTING';
+      inspectStartPerf = performance.now();
+      inspectPenalty = 'OK';
+      timerDisplayEl.className = 'state-inspect';
+      timerDisplayEl.textContent = '15';
+      updateTimerCue('INSPECTION — HOLD SPACE/TOUCH TO READY');
+      syncOnlinePlayerStatus('INSPECTING', null);
+
+      clearInterval(inspectIntervalId);
+      inspectIntervalId = setInterval(() => {
+        const elapsed = (performance.now() - inspectStartPerf) / 1000;
+        if (elapsed < 15) {
+          const rem = Math.ceil(15 - elapsed);
+          timerDisplayEl.textContent = String(rem);
+          inspectPenalty = 'OK';
+        } else if (elapsed < 17) {
+          timerDisplayEl.textContent = '+2';
+          inspectPenalty = '+2';
+        } else {
+          clearInterval(inspectIntervalId);
+          inspectPenalty = 'DNF';
+          finishSolve(0, 'DNF');
+        }
+      }, 60);
+    }
+
+    function startSolve() {
+      clearInterval(inspectIntervalId);
+      timerState = 'RUNNING';
+      holdReady = false;
+      solveStartPerf = performance.now();
+      timerDisplayEl.className = '';
+      document.body.classList.add('solving-active');
+
+      // CFOP setup
+      if (state.splitsEnabled && state.duelMode === 'off') {
+        currentSplitIndex = 0;
+        currentSplitStartPerf = solveStartPerf;
+        recordedSplits = [];
+        updateCfopStripLive(0);
+        updateTimerCue('PHASE 1/4: CROSS — TAP SPACE FOR SPLIT');
+      } else if (Number(state.duelMode) >= 2) {
+        localDuelTurn = 0;
+        const count = Number(state.duelMode);
+        for (let i = 0; i < count; i++) {
+          state.localDuelPlayers[i].timeMs = null;
+          state.localDuelPlayers[i].penalty = 'OK';
+        }
+        renderDuelPanel();
+        updateTimerCue(`DUEL: ${state.localDuelPlayers[0].name} — TAP SPACE WHEN DONE`);
+      } else {
+        updateTimerCue('SOLVING...');
+      }
+
+      syncOnlinePlayerStatus('SOLVING', null);
+
+      const tick = () => {
+        if (timerState !== 'RUNNING') return;
+        const now = performance.now();
+        const elapsed = now - solveStartPerf;
+        timerDisplayEl.textContent = formatTime(elapsed, 'OK');
+
+        if (state.splitsEnabled && state.duelMode === 'off') {
+          updateCfopStripLive(now - currentSplitStartPerf);
+        }
+        rafId = requestAnimationFrame(tick);
+      };
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function updateCfopStripLive(activePhaseMs) {
+      for (let i = 0; i < 4; i++) {
+        const box = document.getElementById(`cfop-box-${i}`);
+        const val = document.getElementById(`cfop-val-${i}`);
+        box.classList.remove('active', 'done');
+        if (i < currentSplitIndex) {
+          box.classList.add('done');
+          val.textContent = formatTime(recordedSplits[i]);
+        } else if (i === currentSplitIndex && timerState === 'RUNNING') {
+          box.classList.add('active');
+          val.textContent = formatTime(activePhaseMs);
+        } else {
+          val.textContent = '-';
+        }
+      }
+    }
+
+    function handleRunningTap() {
+      const now = performance.now();
+      if (now - lastTapDebounce < 85) return;
+      lastTapDebounce = now;
+
+      // Mode A: CFOP 4-Phase Splits
+      if (state.splitsEnabled && state.duelMode === 'off') {
+        const phaseDuration = now - currentSplitStartPerf;
+        recordedSplits.push(phaseDuration);
+        if (currentSplitIndex < 3) {
+          currentSplitIndex++;
+          currentSplitStartPerf = now;
+          updateCfopStripLive(0);
+          updateTimerCue(`PHASE ${currentSplitIndex + 1}/4: ${CFOP_PHASES[currentSplitIndex].toUpperCase()}`);
+          return;
+        }
+        updateCfopStripLive(0);
+      }
+
+      // Mode B: Local 2-6P Simultaneous Duel
+      const localCount = Number(state.duelMode);
+      if (localCount >= 2) {
+        const elapsed = now - solveStartPerf;
+        state.localDuelPlayers[localDuelTurn].timeMs = elapsed;
+        localDuelTurn++;
+        if (localDuelTurn < localCount) {
+          renderDuelPanel();
+          updateTimerCue(`NEXT: ${state.localDuelPlayers[localDuelTurn].name} — TAP SPACE`);
+          return;
+        }
+        // Final player finished: crown winner
+        let bestIdx = 0;
+        let bestTime = Infinity;
+        for (let i = 0; i < localCount; i++) {
+          const t = state.localDuelPlayers[i].timeMs;
+          if (t !== null && t < bestTime) {
+            bestTime = t;
+            bestIdx = i;
+          }
+        }
+        state.localDuelPlayers[bestIdx].wins += 1;
+        saveState();
+      }
+
+      const finalElapsed = now - solveStartPerf;
+      finishSolve(finalElapsed, inspectPenalty);
+    }
+
+    function finishSolve(elapsedMs, penalty = 'OK') {
+      cancelAnimationFrame(rafId);
+      clearInterval(inspectIntervalId);
+      timerState = 'STOPPED';
+      document.body.classList.remove('solving-active');
+      timerDisplayEl.className = '';
+      timerDisplayEl.textContent = formatTime(elapsedMs, penalty);
+      updateTimerCue('HOLD SPACE OR TOUCH FOR NEXT SOLVE');
+
+      const session = state.sessions[state.activeSessionId];
+      const solveRecord = {
+        id: Date.now(),
+        timeMs: elapsedMs,
+        penalty,
+        scramble: currentScramble,
+        event: state.event,
+        date: new Date().toISOString(),
+        splits: recordedSplits.length === 4 ? [...recordedSplits] : null
+      };
+      session.solves.push(solveRecord);
+      saveState();
+      renderStatsPanel();
+      renderDuelPanel();
+
+      if (state.duelMode === 'online' && onlineRoomCode && currentUser) {
+        syncOnlinePlayerStatus('DONE', penalty === 'DNF' ? null : elapsedMs, penalty);
+        postRoomChatMessage(`finished in ${formatTime(elapsedMs, penalty)}`, true);
+      } else {
+        nextScramble(false);
+      }
+    }
+
+    function beginHold() {
+      if (timerState === 'RUNNING') {
+        handleRunningTap();
+        return;
+      }
+      if (holdTimerId) return;
+
+      holdReady = false;
+      timerDisplayEl.classList.remove('state-ready');
+      timerDisplayEl.classList.add('state-holding');
+
+      holdTimerId = setTimeout(() => {
+        holdReady = true;
+        timerDisplayEl.classList.remove('state-holding');
+        timerDisplayEl.classList.add('state-ready');
+        updateTimerCue('RELEASE TO START');
+      }, 280);
+    }
+
+    function releaseHold() {
+      if (!holdTimerId && !holdReady) return;
+      clearTimeout(holdTimerId);
+      holdTimerId = null;
+
+      if (!holdReady) {
+        timerDisplayEl.classList.remove('state-holding', 'state-ready');
+        if (timerState === 'INSPECTING') {
+          timerDisplayEl.classList.add('state-inspect');
+          updateTimerCue('INSPECTION — HOLD SPACE/TOUCH TO READY');
+        } else {
+          updateTimerCue('HOLD SPACE OR TOUCH TO READY');
+        }
+        return;
+      }
+
+      holdReady = false;
+      if (state.inspectionEnabled && timerState !== 'INSPECTING') {
+        timerDisplayEl.classList.remove('state-holding', 'state-ready');
+        startInspection();
+      } else {
+        startSolve();
+      }
+    }
+
+    // Keyboard & Touch Listeners
+    function isTypingInInput(target) {
+      return target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (isTypingInInput(e.target)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (!e.repeat) beginHold();
+      } else if (timerState === 'RUNNING' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        handleRunningTap();
+      } else if (e.altKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        toggleDrawer('stats');
+      } else if (e.altKey && e.key.toLowerCase() === 'm') {
+        e.preventDefault();
+        toggleDrawer('comms');
+      } else if (e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        nextScramble(true);
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (isTypingInInput(e.target)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        releaseHold();
+      }
+    });
+
+    const timerZoneEl = document.getElementById('timer-zone');
+    timerZoneEl.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button, input, select, #duel-panel')) return;
+      beginHold();
+    });
+
+    window.addEventListener('pointerup', () => {
+      releaseHold();
+    });
+
+    // =========================================================================
+    // 5. DUEL PANEL & FIREBASE ONLINE INDIVIDUAL-TIMER ROOMS
+    // =========================================================================
+    let currentUser = null;
+    let onlineRoomCode = null;
+    let onlineRoomData = null;
+    let unsubRoom = null;
+    let unsubChat = null;
+    let unsubVoicePeers = null;
+    let unsubVoiceSignals = null;
+    let unreadChatCount = 0;
+
+    onAuthStateChanged(fbAuth, (user) => {
+      currentUser = user;
+    });
+
+    async function ensureSignedIn() {
+      if (currentUser) return currentUser;
+      const cred = await signInAnonymously(fbAuth);
+      currentUser = cred.user;
+      return currentUser;
+    }
+
+    function isDesktopPC() {
+      return window.innerWidth >= 769 && window.matchMedia('(pointer: fine)').matches;
+    }
+
+    function renderDuelPanel() {
+      const panel = document.getElementById('duel-panel');
+      const onlineCtrl = document.getElementById('online-room-controls');
+      const localCtrl = document.getElementById('local-duel-controls');
+      const grid = document.getElementById('duel-players-grid');
+
+      if (state.duelMode === 'off') {
+        panel.classList.remove('visible');
+        return;
+      }
+
+      panel.classList.add('visible');
+      grid.innerHTML = '';
+
+      if (state.duelMode === 'online') {
+        onlineCtrl.style.display = 'flex';
+        localCtrl.style.display = 'none';
+        document.getElementById('online-room-code-label').textContent = onlineRoomCode || 'NONE';
+        document.getElementById('input-player-alias').value = state.playerAlias;
+        document.getElementById('btn-online-next-round').style.display = onlineRoomCode ? 'inline-block' : 'none';
+
+        if (!onlineRoomCode || !onlineRoomData || !onlineRoomData.players) {
+          grid.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:4px;">Tap <strong>New</strong> or enter a room code to start an individual-timer duel.</div>';
+          return;
+        }
+
+        const players = Object.entries(onlineRoomData.players);
+        const donePlayers = players.filter(([, p]) => p.status === 'DONE' && p.penalty !== 'DNF' && typeof p.timeMs === 'number');
+        const fastestTime = donePlayers.length ? Math.min(...donePlayers.map(([, p]) => p.timeMs)) : null;
+
+        players.forEach(([uid, p]) => {
+          const isWinner = fastestTime !== null && p.status === 'DONE' && p.penalty !== 'DNF' && p.timeMs === fastestTime;
+          const card = document.createElement('div');
+          card.className = `duel-card ${p.status === 'SOLVING' ? 'active-turn' : ''} ${isWinner ? 'winner' : ''}`;
+          const timeText = p.status === 'DONE' ? formatTime(p.timeMs, p.penalty || 'OK') : (p.status || 'READY');
+          card.innerHTML = `
+            <div class="duel-card-top">
+              <span class="duel-name">${escapeHtml(p.name || 'Player')}</span>
+              <span>W:${p.wins || 0}</span>
+            </div>
+            <div class="duel-time">${timeText} ${isWinner ? '🏆' : ''}</div>
+          `;
+          grid.appendChild(card);
+        });
+      } else {
+        // Local 2-6P Duel
+        onlineCtrl.style.display = 'none';
+        localCtrl.style.display = 'flex';
+        const count = Number(state.duelMode);
+        const slice = state.localDuelPlayers.slice(0, count);
+        const finished = slice.filter((p) => p.timeMs !== null && p.penalty !== 'DNF');
+        const fastest = finished.length === count ? Math.min(...finished.map((p) => p.timeMs)) : null;
+
+        slice.forEach((p, idx) => {
+          const isTurn = timerState === 'RUNNING' && localDuelTurn === idx;
+          const isWinner = fastest !== null && p.timeMs === fastest;
+          const card = document.createElement('div');
+          card.className = `duel-card ${isTurn ? 'active-turn' : ''} ${isWinner ? 'winner' : ''}`;
+          card.innerHTML = `
+            <div class="duel-card-top">
+              <span class="duel-name" title="Tap to rename">${escapeHtml(p.name)}</span>
+              <span>W:${p.wins}</span>
+            </div>
+            <div class="duel-time">${p.timeMs !== null ? formatTime(p.timeMs, p.penalty) : (isTurn ? 'SOLVING' : 'READY')} ${isWinner ? '🏆' : ''}</div>
+          `;
+          card.querySelector('.duel-name').addEventListener('click', () => {
+            const nextName = prompt('Player name:', p.name);
+            if (nextName && nextName.trim()) {
+              state.localDuelPlayers[idx].name = nextName.trim().slice(0, 14);
+              saveState();
+              renderDuelPanel();
+            }
+          });
+          grid.appendChild(card);
+        });
+      }
+    }
+
+    async function createOnlineRoom() {
+      const user = await ensureSignedIn();
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+
+      const roomRef = doc(fbDb, 'duel_rooms', code);
+      await setDoc(roomRef, {
+        code,
+        round: 1,
+        event: state.event,
+        scramble: currentScramble,
+        createdAt: serverTimestamp(),
+        players: {
+          [user.uid]: {
+            name: state.playerAlias,
+            status: 'READY',
+            timeMs: null,
+            penalty: 'OK',
+            wins: 0
+          }
+        }
+      });
+      attachToOnlineRoom(code);
+    }
+
+    async function joinOnlineRoom(rawCode) {
+      const code = (rawCode || '').trim().toUpperCase();
+      if (!code) return;
+      const user = await ensureSignedIn();
+      const roomRef = doc(fbDb, 'duel_rooms', code);
+      const snap = await getDoc(roomRef);
+      if (!snap.exists()) {
+        alert('Room not found: ' + code);
+        return;
+      }
+      await updateDoc(roomRef, {
+        [`players.${user.uid}`]: {
+          name: state.playerAlias,
+          status: 'READY',
+          timeMs: null,
+          penalty: 'OK',
+          wins: 0
+        }
+      });
+      attachToOnlineRoom(code);
+    }
+
+    function attachToOnlineRoom(code) {
+      if (unsubRoom) unsubRoom();
+      if (unsubChat) unsubChat();
+      onlineRoomCode = code;
+      document.getElementById('vc-room-warning').style.display = 'none';
+
+      // Listen to room state
+      unsubRoom = onSnapshot(doc(fbDb, 'duel_rooms', code), (snap) => {
+        if (!snap.exists()) return;
+        onlineRoomData = snap.data();
+        if (onlineRoomData.scramble && onlineRoomData.scramble !== currentScramble) {
+          currentScramble = onlineRoomData.scramble;
+          document.getElementById('scramble-bar').textContent = currentScramble;
+        }
+        renderDuelPanel();
+        renderCameraDock();
+      });
+
+      // Listen to room chat
+      const chatQ = query(
+        collection(fbDb, 'duel_rooms', code, 'messages'),
+        orderBy('createdAt', 'asc'),
+        limit(60)
+      );
+      unsubChat = onSnapshot(chatQ, (snap) => {
+        const feed = document.getElementById('chat-feed');
+        feed.innerHTML = '';
+        snap.forEach((docSnap) => {
+          const m = docSnap.data();
+          const div = document.createElement('div');
+          div.className = 'chat-msg';
+          div.innerHTML = `<span class="chat-sender">${escapeHtml(m.senderName || 'Player')}:</span> ${escapeHtml(m.text || '')}`;
+          feed.appendChild(div);
+        });
+        feed.scrollTop = feed.scrollHeight;
+
+        const commsOpen = isDrawerOpen('comms');
+        if (!commsOpen && snap.size > 0) {
+          unreadChatCount++;
+          document.getElementById('comms-badge').textContent = `(${unreadChatCount})`;
+        }
+      });
+
+      renderDuelPanel();
+    }
+
+    async function syncOnlinePlayerStatus(status, timeMs = null, penalty = 'OK') {
+      if (state.duelMode !== 'online' || !onlineRoomCode || !currentUser) return;
+      try {
+        await updateDoc(doc(fbDb, 'duel_rooms', onlineRoomCode), {
+          [`players.${currentUser.uid}.status`]: status,
+          [`players.${currentUser.uid}.timeMs`]: timeMs,
+          [`players.${currentUser.uid}.penalty`]: penalty,
+          [`players.${currentUser.uid}.name`]: state.playerAlias
+        });
+      } catch (e) {
+        console.warn('Sync status error:', e);
+      }
+    }
+
+    async function startNextOnlineRound() {
+      if (!onlineRoomCode || !onlineRoomData || !onlineRoomData.players) return;
+      const newScram = generateScramble(state.event);
+      const players = onlineRoomData.players;
+      const entries = Object.entries(players);
+      const validDone = entries.filter(([, p]) => p.status === 'DONE' && p.penalty !== 'DNF' && typeof p.timeMs === 'number');
+      const minTime = validDone.length ? Math.min(...validDone.map(([, p]) => p.timeMs)) : null;
+
+      const updatedPlayers = {};
+      entries.forEach(([uid, p]) => {
+        const won = minTime !== null && p.status === 'DONE' && p.penalty !== 'DNF' && p.timeMs === minTime;
+        updatedPlayers[uid] = {
+          ...p,
+          status: 'READY',
+          timeMs: null,
+          penalty: 'OK',
+          wins: (p.wins || 0) + (won ? 1 : 0)
+        };
+      });
+
+      await updateDoc(doc(fbDb, 'duel_rooms', onlineRoomCode), {
+        round: (onlineRoomData.round || 1) + 1,
+        scramble: newScram,
+        players: updatedPlayers
+      });
+    }
+
+    async function postRoomChatMessage(text, isSystem = false) {
+      const clean = (text || '').trim();
+      if (!clean || !onlineRoomCode) return;
+      const user = await ensureSignedIn();
+      await addDoc(collection(fbDb, 'duel_rooms', onlineRoomCode, 'messages'), {
+        senderUid: user.uid,
+        senderName: isSystem ? `[${state.playerAlias}]` : state.playerAlias,
+        text: clean.slice(0, 280),
+        createdAt: serverTimestamp()
+      });
+    }
+
+    // =========================================================================
+    // 6. WEBRTC VOICE CHAT (MOBILE + PC) & LIVE VIDEO CAM (PC ONLY)
+    // =========================================================================
+    const RTC_CONFIG = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    let voiceJoined = false;
+    let micMuted = false;
+    let camEnabled = false;
+    let localStream = null;
+    const peerConnections = {}; // remoteUid -> RTCPeerConnection
+    const remoteStreams = {};   // remoteUid -> MediaStream
+    const pendingIceCandidates = {}; // remoteUid -> RTCIceCandidateInit[]
+
+    function unlockMobileAudio() {
+      const pool = document.getElementById('remote-audio-pool');
+      pool.querySelectorAll('audio').forEach((audioEl) => {
+        audioEl.play().catch(() => {});
+      });
+      document.getElementById('btn-mobile-audio-unlock').style.display = 'none';
+    }
+
+    async function joinVoiceChat() {
+      if (!onlineRoomCode) {
+        alert('Create or join an Online Duel room first to use Voice Chat.');
+        return;
+      }
+      const user = await ensureSignedIn();
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          },
+          video: false
+        });
+      } catch (err) {
+        alert('Microphone access denied or unavailable: ' + err.message);
+        return;
+      }
+
+      voiceJoined = true;
+      micMuted = false;
+      camEnabled = false;
+      unlockMobileAudio();
+
+      await setDoc(doc(fbDb, 'duel_rooms', onlineRoomCode, 'voicePeers', user.uid), {
+        peerUid: user.uid,
+        name: state.playerAlias,
+        muted: false,
+        hasCam: false,
+        joinedAt: serverTimestamp()
+      });
+
+      // Listen for voice peers in room
+      unsubVoicePeers = onSnapshot(collection(fbDb, 'duel_rooms', onlineRoomCode, 'voicePeers'), (snap) => {
+        const peersList = document.getElementById('vc-peers-list');
+        peersList.innerHTML = '';
+        const activeUids = new Set();
+
+        snap.forEach((docSnap) => {
+          const p = docSnap.data();
+          activeUids.add(p.peerUid);
+          const pill = document.createElement('span');
+          pill.className = 'peer-pill';
+          pill.innerHTML = `<span class="live-dot"></span> ${escapeHtml(p.name || 'Peer')} ${p.muted ? '🔇' : '🎙️'} ${p.hasCam ? '📹' : ''}`;
+          peersList.appendChild(pill);
+
+          if (p.peerUid !== user.uid && !peerConnections[p.peerUid]) {
+            // Deterministic offer initiator by lexicographical UID comparison
+            if (user.uid < p.peerUid) {
+              createPeerConnection(p.peerUid, true);
+            }
+          }
+        });
+
+        Object.keys(peerConnections).forEach((remoteUid) => {
+          if (!activeUids.has(remoteUid)) {
+            closePeerConnection(remoteUid);
+          }
+        });
+        renderCameraDock();
+      });
+
+      // Listen for incoming WebRTC signals addressed to this user
+      unsubVoiceSignals = onSnapshot(collection(fbDb, 'duel_rooms', onlineRoomCode, 'voiceSignals'), (snap) => {
+        snap.docChanges().forEach(async (change) => {
+          if (change.type !== 'added') return;
+          const sig = change.doc.data();
+          if (sig.to !== user.uid) return;
+
+          const fromUid = sig.from;
+          await deleteDoc(change.doc.ref).catch(() => {});
+
+          let pc = peerConnections[fromUid];
+          if (!pc) {
+            pc = await createPeerConnection(fromUid, false);
+          }
+
+          if (sig.type === 'offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(sig.sdp));
+            await flushPendingIce(fromUid, pc);
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            await sendSignal(fromUid, { type: 'answer', sdp: pc.localDescription.toJSON() });
+          } else if (sig.type === 'answer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(sig.sdp));
+            await flushPendingIce(fromUid, pc);
+          } else if (sig.type === 'ice' && sig.candidate) {
+            if (pc.remoteDescription) {
+              await pc.addIceCandidate(new RTCIceCandidate(sig.candidate)).catch(() => {});
+            } else {
+              pendingIceCandidates[fromUid] = pendingIceCandidates[fromUid] || [];
+              pendingIceCandidates[fromUid].push(sig.candidate);
+            }
+          }
+        });
+      });
+
+      updateVoiceControlsUI();
+      renderCameraDock();
+    }
+
+    async function flushPendingIce(remoteUid, pc) {
+      const queued = pendingIceCandidates[remoteUid] || [];
+      delete pendingIceCandidates[remoteUid];
+      for (const c of queued) {
+        await pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
+      }
+    }
+
+    async function sendSignal(toUid, payload) {
+      if (!onlineRoomCode || !currentUser) return;
+      await addDoc(collection(fbDb, 'duel_rooms', onlineRoomCode, 'voiceSignals'), {
+        from: currentUser.uid,
+        to: toUid,
+        ...payload,
+        createdAt: serverTimestamp()
+      });
+    }
+
+    async function createPeerConnection(remoteUid, isInitiator) {
+      const pc = new RTCPeerConnection(RTC_CONFIG);
+      peerConnections[remoteUid] = pc;
+
+      if (localStream) {
+        localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
+      }
+
+      pc.onicecandidate = (e) => {
+        if (e.candidate) {
+          sendSignal(remoteUid, { type: 'ice', candidate: e.candidate.toJSON() });
+        }
+      };
+
+      pc.ontrack = (e) => {
+        const stream = e.streams[0] || new MediaStream([e.track]);
+        remoteStreams[remoteUid] = stream;
+
+        // Attach audio element for mobile + desktop playback
+        let audioEl = document.getElementById(`audio-${remoteUid}`);
+        if (!audioEl) {
+          audioEl = document.createElement('audio');
+          audioEl.id = `audio-${remoteUid}`;
+          audioEl.autoplay = true;
+          audioEl.playsInline = true;
+          audioEl.setAttribute('playsinline', '');
+          audioEl.setAttribute('webkit-playsinline', '');
+          document.getElementById('remote-audio-pool').appendChild(audioEl);
+        }
+        audioEl.srcObject = stream;
+        audioEl.play().catch(() => {
+          document.getElementById('btn-mobile-audio-unlock').style.display = 'block';
+        });
+
+        renderCameraDock();
+      };
+
+      if (isInitiator) {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await sendSignal(remoteUid, { type: 'offer', sdp: pc.localDescription.toJSON() });
+      }
+
+      return pc;
+    }
+
+    function closePeerConnection(remoteUid) {
+      if (peerConnections[remoteUid]) {
+        peerConnections[remoteUid].close();
+        delete peerConnections[remoteUid];
+      }
+      delete remoteStreams[remoteUid];
+      const audioEl = document.getElementById(`audio-${remoteUid}`);
+      if (audioEl) audioEl.remove();
+      renderCameraDock();
+    }
+
+    async function toggleMuteMic() {
+      if (!localStream || !voiceJoined) return;
+      micMuted = !micMuted;
+      localStream.getAudioTracks().forEach((t) => (t.enabled = !micMuted));
+      updateVoiceControlsUI();
+      if (onlineRoomCode && currentUser) {
+        await updateDoc(doc(fbDb, 'duel_rooms', onlineRoomCode, 'voicePeers', currentUser.uid), {
+          muted: micMuted
+        }).catch(() => {});
+      }
+    }
+
+    // PC-Only Camera Toggle with Live WebRTC Renegotiation
+    async function toggleVoiceCamera() {
+      if (!isDesktopPC() || !voiceJoined || !localStream) return;
+
+      if (!camEnabled) {
+        try {
+          const camStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 320 }, height: { ideal: 240 }, facingMode: 'user' }
+          });
+          const videoTrack = camStream.getVideoTracks()[0];
+          localStream.addTrack(videoTrack);
+          camEnabled = true;
+
+          for (const [remoteUid, pc] of Object.entries(peerConnections)) {
+            pc.addTrack(videoTrack, localStream);
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            await sendSignal(remoteUid, { type: 'offer', sdp: pc.localDescription.toJSON() });
+          }
+        } catch (err) {
+          alert('Camera access failed: ' + err.message);
+          return;
+        }
+      } else {
+        localStream.getVideoTracks().forEach((t) => {
+          t.stop();
+          localStream.removeTrack(t);
+        });
+        camEnabled = false;
+
+        for (const [remoteUid, pc] of Object.entries(peerConnections)) {
+          pc.getSenders().forEach((sender) => {
+            if (sender.track && sender.track.kind === 'video') {
+              pc.removeTrack(sender);
+            }
+          });
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          await sendSignal(remoteUid, { type: 'offer', sdp: pc.localDescription.toJSON() });
+        }
+      }
+
+      if (onlineRoomCode && currentUser) {
+        await updateDoc(doc(fbDb, 'duel_rooms', onlineRoomCode, 'voicePeers', currentUser.uid), {
+          hasCam: camEnabled
+        }).catch(() => {});
+      }
+      updateVoiceControlsUI();
+      renderCameraDock();
+    }
+
+    async function leaveVoiceChat() {
+      voiceJoined = false;
+      camEnabled = false;
+      micMuted = false;
+
+      if (unsubVoicePeers) unsubVoicePeers();
+      if (unsubVoiceSignals) unsubVoiceSignals();
+      unsubVoicePeers = null;
+      unsubVoiceSignals = null;
+
+      Object.keys(peerConnections).forEach(closePeerConnection);
+
+      if (localStream) {
+        localStream.getTracks().forEach((t) => t.stop());
+        localStream = null;
+      }
+
+      if (onlineRoomCode && currentUser) {
+        await deleteDoc(doc(fbDb, 'duel_rooms', onlineRoomCode, 'voicePeers', currentUser.uid)).catch(() => {});
+      }
+
+      document.getElementById('vc-peers-list').innerHTML = '';
+      document.getElementById('btn-mobile-audio-unlock').style.display = 'none';
+      updateVoiceControlsUI();
+      renderCameraDock();
+    }
+
+    function updateVoiceControlsUI() {
+      document.getElementById('btn-vc-join').style.display = voiceJoined ? 'none' : 'inline-block';
+      document.getElementById('btn-vc-mute').style.display = voiceJoined ? 'inline-block' : 'none';
+      document.getElementById('btn-vc-leave').style.display = voiceJoined ? 'inline-block' : 'none';
+      document.getElementById('btn-vc-cam').style.display = voiceJoined && isDesktopPC() ? 'inline-block' : 'none';
+
+      const muteBtn = document.getElementById('btn-vc-mute');
+      muteBtn.textContent = micMuted ? 'Unmute' : 'Mute Mic';
+      muteBtn.classList.toggle('danger', micMuted);
+
+      const camBtn = document.getElementById('btn-vc-cam');
+      camBtn.textContent = camEnabled ? 'Cam ON' : 'Cam Off';
+      camBtn.classList.toggle('active', camEnabled);
+
+      document.getElementById('vc-status-text').textContent = voiceJoined
+        ? 'Connected to room voice.'
+        : 'Voice disconnected.';
+    }
+
+    // Always-Visible Camera Dock Below Timer (Visible Even During Solves)
+    function renderCameraDock() {
+      const dock = document.getElementById('solve-cam-dock');
+      dock.innerHTML = '';
+      let tileCount = 0;
+
+      // Local PC camera tile
+      if (voiceJoined && camEnabled && localStream && localStream.getVideoTracks().length > 0) {
+        const myData = onlineRoomData?.players?.[currentUser?.uid];
+        const statusLabel = timerState === 'RUNNING' ? 'SOLVING' : (myData?.status || 'YOU');
+        const tile = document.createElement('div');
+        tile.className = `solve-cam-tile ${timerState === 'RUNNING' ? 'solving' : ''}`;
+        const vid = document.createElement('video');
+        vid.autoplay = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.className = 'mirrored';
+        vid.srcObject = localStream;
+        const badge = document.createElement('div');
+        badge.className = 'solve-cam-badge';
+        badge.innerHTML = `<span>${escapeHtml(state.playerAlias)}</span><span>${statusLabel}</span>`;
+        tile.append(vid, badge);
+        dock.appendChild(tile);
+        tileCount++;
+      }
+
+      // Remote peers with active video tracks
+      Object.entries(remoteStreams).forEach(([uid, stream]) => {
+        const liveVideoTracks = stream.getVideoTracks().filter((t) => t.readyState === 'live');
+        if (liveVideoTracks.length === 0) return;
+        const pInfo = onlineRoomData?.players?.[uid] || {};
+        const statusLabel = pInfo.status === 'DONE'
+          ? formatTime(pInfo.timeMs, pInfo.penalty || 'OK')
+          : (pInfo.status || 'LIVE');
+        const tile = document.createElement('div');
+        tile.className = `solve-cam-tile ${pInfo.status === 'SOLVING' ? 'solving' : ''}`;
+        const vid = document.createElement('video');
+        vid.autoplay = true;
+        vid.muted = true; // Audio handled by dedicated audio element
+        vid.playsInline = true;
+        vid.srcObject = stream;
+        const badge = document.createElement('div');
+        badge.className = 'solve-cam-badge';
+        badge.innerHTML = `<span>${escapeHtml(pInfo.name || 'Peer')}</span><span>${statusLabel}</span>`;
+        tile.append(vid, badge);
+        dock.appendChild(tile);
+        tileCount++;
+      });
+
+      dock.classList.toggle('has-cams', tileCount > 0);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && voiceJoined) unlockMobileAudio();
+    });
+
+    // =========================================================================
+    // 7. DRAWERS, MODALS & UI WIRING
+    // =========================================================================
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    function isDrawerOpen(which) {
+      const panel = document.getElementById(which === 'stats' ? 'stats-panel' : 'comms-panel');
+      return window.innerWidth <= 860
+        ? panel.classList.contains('open')
+        : !panel.classList.contains('collapsed');
+    }
+
+    function toggleDrawer(which) {
+      const panel = document.getElementById(which === 'stats' ? 'stats-panel' : 'comms-panel');
+      const other = document.getElementById(which === 'stats' ? 'comms-panel' : 'stats-panel');
+      const backdrop = document.getElementById('drawer-backdrop');
+
+      if (window.innerWidth <= 860) {
+        other.classList.remove('open');
+        const willOpen = !panel.classList.contains('open');
+        panel.classList.toggle('open', willOpen);
+        backdrop.classList.toggle('open', willOpen);
+      } else {
+        panel.classList.toggle('collapsed');
+      }
+
+      if (which === 'comms' && isDrawerOpen('comms')) {
+        unreadChatCount = 0;
+        document.getElementById('comms-badge').textContent = '';
+      }
+    }
+
+    function closeMobileDrawers() {
+      document.getElementById('stats-panel').classList.remove('open');
+      document.getElementById('comms-panel').classList.remove('open');
+      document.getElementById('drawer-backdrop').classList.remove('open');
+    }
+
+    let selectedSolveIndex = null;
+    function openSolveModal(index) {
+      const session = state.sessions[state.activeSessionId];
+      const s = session.solves[index];
+      if (!s) return;
+      selectedSolveIndex = index;
+      document.getElementById('solve-modal-title').textContent = `SOLVE #${index + 1} — ${formatTime(s.timeMs, s.penalty)}`;
+
+      let html = `
+        <div><strong>Event:</strong> ${escapeHtml(s.event || state.event)}</div>
+        <div><strong>Scramble:</strong> ${escapeHtml(s.scramble || '-')}</div>
+      `;
+      if (Array.isArray(s.splits) && s.splits.length === 4) {
+        let cum = 0;
+        html += `<table class="stat-table" style="margin-top:6px;"><thead><tr><th>Phase</th><th>Split</th><th>Cumulative</th></tr></thead><tbody>`;
+        s.splits.forEach((sp, i) => {
+          cum += sp;
+          html += `<tr><td>${CFOP_PHASES[i]}</td><td>${formatTime(sp)}</td><td>${formatTime(cum)}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+      }
+      document.getElementById('solve-modal-body').innerHTML = html;
+      document.getElementById('solve-modal').classList.add('open');
+    }
+
+    function syncAllUI() {
+      document.body.classList.toggle('theme-light', state.theme === 'light');
+      document.getElementById('btn-toggle-theme').textContent = state.theme === 'light' ? 'Light' : 'Dark';
+
+      const inspBtn = document.getElementById('btn-toggle-insp');
+      inspBtn.textContent = `Insp: ${state.inspectionEnabled ? 'ON' : 'OFF'}`;
+      inspBtn.classList.toggle('active', state.inspectionEnabled);
+
+      const splitsBtn = document.getElementById('btn-toggle-splits');
+      splitsBtn.textContent = state.splitsEnabled ? 'ON' : 'OFF';
+      splitsBtn.classList.toggle('active', state.splitsEnabled);
+
+      document.getElementById('cfop-strip').classList.toggle('visible', state.splitsEnabled && state.duelMode === 'off');
+      document.getElementById('select-event').value = state.event;
+      document.getElementById('select-duel-mode').value = state.duelMode;
+
+      renderDuelPanel();
+      renderStatsPanel();
+    }
+
+    // Wire Buttons & Inputs
+    document.getElementById('btn-toggle-stats').addEventListener('click', () => toggleDrawer('stats'));
+    document.getElementById('btn-close-stats').addEventListener('click', () => toggleDrawer('stats'));
+    document.getElementById('btn-toggle-comms').addEventListener('click', () => toggleDrawer('comms'));
+    document.getElementById('btn-close-comms').addEventListener('click', () => toggleDrawer('comms'));
+    document.getElementById('drawer-backdrop').addEventListener('click', closeMobileDrawers);
+
+    document.getElementById('btn-toggle-insp').addEventListener('click', () => {
+      state.inspectionEnabled = !state.inspectionEnabled;
+      saveState();
+      syncAllUI();
+    });
+
+    document.getElementById('btn-toggle-splits').addEventListener('click', () => {
+      state.splitsEnabled = !state.splitsEnabled;
+      saveState();
+      syncAllUI();
+    });
+
+    document.getElementById('btn-toggle-theme').addEventListener('click', () => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      saveState();
+      syncAllUI();
+      applyBackgroundVisuals();
+    });
+
+    document.getElementById('select-duel-mode').addEventListener('change', (e) => {
+      state.duelMode = e.target.value;
+      saveState();
+      syncAllUI();
+    });
+
+    document.getElementById('select-event').addEventListener('change', (e) => {
+      state.event = e.target.value;
+      saveState();
+      nextScramble(true);
+    });
+
+    document.getElementById('scramble-bar').addEventListener('click', () => nextScramble(true));
+    document.getElementById('btn-next-scramble').addEventListener('click', () => nextScramble(true));
+    document.getElementById('btn-copy-scramble').addEventListener('click', () => {
+      navigator.clipboard?.writeText(currentScramble);
+    });
+
+    // Settings Modal
+    document.getElementById('btn-open-settings').addEventListener('click', () => {
+      document.getElementById('settings-modal').classList.add('open');
+    });
+    document.getElementById('btn-close-settings').addEventListener('click', () => {
+      document.getElementById('settings-modal').classList.remove('open');
+    });
+
+    // Background Image / GIF Handlers
+    document.getElementById('file-bg-upload').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      state.bgUrl = '';
+      await saveBgBlobToIdb(file);
+      saveState();
+      applyBackgroundVisuals();
+    });
+
+    document.getElementById('btn-apply-bg-url').addEventListener('click', async () => {
+      const url = document.getElementById('input-bg-url').value.trim();
+      if (!url) return;
+      state.bgUrl = url;
+      await clearBgBlobFromIdb();
+      saveState();
+      applyBackgroundVisuals();
+    });
+
+    document.getElementById('range-bg-dim').addEventListener('input', (e) => {
+      state.bgDim = Number(e.target.value);
+      saveState();
+      applyBackgroundVisuals();
+    });
+
+    document.getElementById('range-bg-blur').addEventListener('input', (e) => {
+      state.bgBlur = Number(e.target.value);
+      saveState();
+      applyBackgroundVisuals();
+    });
+
+    document.getElementById('btn-clear-bg').addEventListener('click', async () => {
+      state.bgUrl = '';
+      document.getElementById('input-bg-url').value = '';
+      await clearBgBlobFromIdb();
+      saveState();
+      applyBackgroundVisuals();
+    });
+
+    // Session Controls
+    document.getElementById('select-session').addEventListener('change', (e) => {
+      state.activeSessionId = e.target.value;
+      saveState();
+      renderStatsPanel();
+    });
+
+    document.getElementById('btn-new-session').addEventListener('click', () => {
+      const name = prompt('New session name:', `Session ${Object.keys(state.sessions).length + 1}`);
+      if (!name || !name.trim()) return;
+      const id = 'sess_' + Date.now();
+      state.sessions[id] = { name: name.trim(), solves: [] };
+      state.activeSessionId = id;
+      saveState();
+      renderStatsPanel();
+    });
+
+    document.getElementById('btn-reset-session').addEventListener('click', () => {
+      if (!confirm('Clear all solves in this session?')) return;
+      state.sessions[state.activeSessionId].solves = [];
+      saveState();
+      renderStatsPanel();
+    });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state.sessions, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `kairotyme_sessions_${Date.now()}.json`;
+      a.click();
+    });
+
+    document.getElementById('btn-import-json').addEventListener('click', () => {
+      document.getElementById('file-import-json').click();
+    });
+
+    document.getElementById('file-import-json').addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(reader.result);
+          if (imported && typeof imported === 'object') {
+            state.sessions = { ...state.sessions, ...imported };
+            saveState();
+            renderStatsPanel();
+          }
+        } catch {
+          alert('Invalid JSON session file.');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Solve Details Modal Actions
+    document.getElementById('btn-close-solve-modal').addEventListener('click', () => {
+      document.getElementById('solve-modal').classList.remove('open');
+    });
+
+    function updateSelectedSolvePenalty(pen) {
+      if (selectedSolveIndex === null) return;
+      const session = state.sessions[state.activeSessionId];
+      session.solves[selectedSolveIndex].penalty = pen;
+      saveState();
+      renderStatsPanel();
+      openSolveModal(selectedSolveIndex);
+    }
+
+    document.getElementById('btn-solve-ok').addEventListener('click', () => updateSelectedSolvePenalty('OK'));
+    document.getElementById('btn-solve-plus2').addEventListener('click', () => updateSelectedSolvePenalty('+2'));
+    document.getElementById('btn-solve-dnf').addEventListener('click', () => updateSelectedSolvePenalty('DNF'));
+    document.getElementById('btn-solve-del').addEventListener('click', () => {
+      if (selectedSolveIndex === null) return;
+      const session = state.sessions[state.activeSessionId];
+      session.solves.splice(selectedSolveIndex, 1);
+      saveState();
+      renderStatsPanel();
+      document.getElementById('solve-modal').classList.remove('open');
+    });
+
+    // Duel & Comms Event Listeners
+    document.getElementById('btn-create-room').addEventListener('click', createOnlineRoom);
+    document.getElementById('btn-join-room').addEventListener('click', () => {
+      joinOnlineRoom(document.getElementById('input-join-code').value);
+    });
+    document.getElementById('btn-copy-room').addEventListener('click', () => {
+      if (onlineRoomCode) navigator.clipboard?.writeText(onlineRoomCode);
+    });
+    document.getElementById('input-player-alias').addEventListener('change', (e) => {
+      const val = e.target.value.trim();
+      if (!val) return;
+      state.playerAlias = val.slice(0, 16);
+      saveState();
+      syncOnlinePlayerStatus('READY', null);
+    });
+    document.getElementById('btn-online-next-round').addEventListener('click', startNextOnlineRound);
+    document.getElementById('btn-local-next-round').addEventListener('click', () => {
+      state.localDuelPlayers.forEach((p) => {
+        p.timeMs = null;
+        p.penalty = 'OK';
+      });
+      nextScramble(false);
+      renderDuelPanel();
+    });
+
+    document.getElementById('btn-vc-join').addEventListener('click', joinVoiceChat);
+    document.getElementById('btn-vc-mute').addEventListener('click', toggleMuteMic);
+    document.getElementById('btn-vc-cam').addEventListener('click', toggleVoiceCamera);
+    document.getElementById('btn-vc-leave').addEventListener('click', leaveVoiceChat);
+    document.getElementById('btn-mobile-audio-unlock').addEventListener('click', unlockMobileAudio);
+
+    document.getElementById('chat-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      postRoomChatMessage(input.value, false);
+      input.value = '';
+    });
+
+    document.querySelectorAll('.quick-chat-btn').forEach((btn) => {
+      btn.addEventListener('click', () => postRoomChatMessage(btn.dataset.msg, false));
+    });
+
+    // Initialize App
+    syncAllUI();
+    applyBackgroundVisuals();
+    nextScramble(false);
+  </script>
+
+  <!-- Register Service Worker for PWA / APK Support -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

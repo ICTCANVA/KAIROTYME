@@ -1,0 +1,25 @@
+{
+  "name": "kairoTYME",
+  "short_name": "kairoTYME",
+  "description": "Speedcubing timer with CFOP splits, online multiplayer duels, and voice/video comms.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12",
+  "icons": [
+    {
+      "src": "https://dummyimage.com/192x192/0d0f12/3b82f6.png&text=kT",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://dummyimage.com/512x512/0d0f12/3b82f6.png&text=kT",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
